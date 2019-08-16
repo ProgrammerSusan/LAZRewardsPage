@@ -28,7 +28,9 @@ class StudentPortal extends Controller
     public function __construct() {
         parent::__construct();
     }
-/* ------------------------------------------------------------------------------ FEATURE CODE ----------------------------------------------------------------------------- */
+
+    public function setStudentAssignmentsContext() {
+/* ------------------------------------------------------------------------------ FEATURE CODE ----------------------------------------------------------------------------- */		
         //If feature deployed remove if block, otherwise move code within block back to (if isIntermediateInterfaceEnabled())
         $featureCheck = new FeatureCheck();
         if (FeatureCheck::hasFeatureEnabled("REWARDS_PAGE_INTERN_PROJECT") || StudentInfoCache::isIntermediateInterfaceEnabled()){
@@ -69,4 +71,5 @@ class StudentPortal extends Controller
 
         return ($this->view);
     }
+
 }
