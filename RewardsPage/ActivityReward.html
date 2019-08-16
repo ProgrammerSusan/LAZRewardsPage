@@ -1,0 +1,58 @@
+<?
+/** @var \LAZ\objects\shared\utils\analytics\SiteTrackingScriptGenerator $siteTrackingGenerator */
+use LAZ\objects\tools\FeatureCheck;
+use LAZ\objects\library\PHPUtil;
+
+function resetSpecificStarsEarned() {
+    if(FeatureCheck::hasFeatureEnabled("REWARDS_PAGE_INTERN_PROJECT"))
+    unset($_SESSION['score_earned']['assignment_complete']);
+    unset($_SESSION['studentInfo']['additionalStarsEarned']);
+}
+/* ------------------------------------------------------------------------------ FEATURE CODE ----------------------------------------------------------------------------- */
+if(FeatureCheck::hasFeatureEnabled("REWARDS_PAGE_INTERN_PROJECT")){ ?>
+    <script type="text/javascript" src="/shared/js/prototype<?=$_ENV['BUILDTAG']?>.js" nonce="<?=$_ENV['RANDOM_NONCE']?>"></script>
+<?}?>
+/* ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr" >
+<? $this->display("include/_xmlTag"); ?>
+<head>
+ 
+    <script type="text/javascript" src="/shared/js/angular-1.6.0/angular.min<?= $_ENV['BUILDTAG'] ?>.js" nonce="<?=$_ENV['RANDOM_NONCE']?>"></script>
+    <script type="text/javascript" src="/shared/js/angular-1.6.0/angular-animate.min<?= $_ENV['BUILDTAG'] ?>.js" nonce="<?=$_ENV['RANDOM_NONCE']?>"></script>
+    <script type="text/javascript" src="/shared/js/angular-1.6.0/angular-messages.min<?= $_ENV['BUILDTAG'] ?>.js" nonce="<?=$_ENV['RANDOM_NONCE']?>"></script>
+    <script type="text/javascript" src="/shared/js/angular-1.6.0/angular-resource.min<?= $_ENV['BUILDTAG'] ?>.js" nonce="<?=$_ENV['RANDOM_NONCE']?>"></script>
+    <script type="text/javascript" src="/shared/js/angular/angular-modal-service<?= $_ENV['BUILDTAG'] ?>.js" nonce="<?=$_ENV['RANDOM_NONCE']?>"></script>
+    <script type="text/javascript" src="/shared/js/angular/angular-ng-modules<?= $_ENV['BUILDTAG'] ?>.js" nonce="<?=$_ENV['RANDOM_NONCE']?>"></script>
+    <script type="text/javascript" src="/shared/js/angular/angular-modal-service<?= $_ENV['BUILDTAG'] ?>.js" nonce="<?=$_ENV['RANDOM_NONCE']?>"></script>
+    <script type="text/javascript" src="/shared/js/angular/shared.module<?= $_ENV['BUILDTAG'] ?>.js" nonce="<?=$_ENV['RANDOM_NONCE']?>"></script>
+    <? include $_ENV['ROOT_WWW_PATH']."/html/kidsa-z/js/angular/kids.include.html"; ?>
+    <? include_once("{$_ENV["ROOT_WWW_PATH"]}/html/kidsa-z/js/angular/student-resource/include.html"); ?>
+/* ------------------------------------------------------------------------------ FEATURE CODE ----------------------------------------------------------------------------- */
+    <? if(FeatureCheck::hasFeatureEnabled("REWARDS_PAGE_INTERN_PROJECT")){
+        require_once $_ENV['ROOT_WWW_PATH']."/html/kidsa-z/js/angular/activity-reward/include.html";
+    } ?>
+/* ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+
+    <script type="text/javascript" src="/js/activityRewardResizer<?=$_ENV['BUILDTAG']?>.js" nonce="<?=$_ENV['RANDOM_NONCE']?>"></script>
+
+
+</head>
+
+<body id="body" class="<?=$backgroundCssIdentifier?>" ng-app="kids">
+<?=$siteTrackingGenerator->generateForBody()?>
+<?
+/* ------------------------------------------------------------------------------ FEATURE CODE ----------------------------------------------------------------------------- */
+if(FeatureCheck::hasFeatureEnabled("REWARDS_PAGE_INTERN_PROJECT")){
+    include ($_ENV['ROOT_WWW_PATH']."/html/kidsa-z/content/_starsAndProgress.html"); ?>
+    <activity-reward reward-page-content='<?= htmlspecialchars(json_encode($activityRewardContent),ENT_QUOTES) ?>'></activity-reward>
+<?}
+/* ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+else{
+    include($_ENV['ROOT_WWW_PATH']."/html/shared/content/ActivityReward.html");
+}
+resetSpecificStarsEarned();
+?>
+</body>
+</html>

@@ -1,0 +1,11 @@
+<div class="" ng-if="$ctrl.location">
+    <div class="ebookHeader">
+        <div>
+            <a ng-href="{{$ctrl.location}}" class="backBtn">{{ $ctrl.linkText }}</a>
+        </div>
+        <span class="bookTitle">{{ $ctrl.title }}</span>
+        <div ng-show="$ctrl.canFavoriteResource">
+            <favorite favorite-data="$ctrl.rewardHeader.favoriteData"></favorite>
+        </div>
+    </div>
+</div>

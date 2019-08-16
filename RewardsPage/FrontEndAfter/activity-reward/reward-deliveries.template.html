@@ -1,0 +1,8 @@
+<div id="activityStatus" class="rewardPage_activities">
+    <div ng-repeat="(activity, activityInfo) in $ctrl.deliveryInfo">
+        <a class="activity_link " ng-class="[activityInfo.status, activityInfo.bookmark]"
+            ng-href="{{ activityInfo.href }}">
+            <span class="activity_icon activity_icon-lg " ng-class="$ctrl.getIcon(activity)"></span>
+        </a>
+    </div>
+</div>

@@ -1,0 +1,311 @@
+<? use LAZ\objects\library\ActivityTypeHelper; ?>
+
+<script type="text/javascript" src="/shared/js/quizPlayerHTML5.js" nonce="<?=$_ENV['RANDOM_NONCE']?>"></script>
+<script type="text/javascript" src="/shared/js/ModalKeyboardAccess<?=$_ENV['BUILDTAG']?>.js" nonce="<?=$_ENV['RANDOM_NONCE']?>"></script>
+
+<script type="text/javascript" nonce="<?=$_ENV['RANDOM_NONCE']?>">
+    $j(document).ready(function() {
+        var audio = null;
+
+        var enabledTimedReadError = $j('#enableTimedReadError').val();
+        if (enabledTimedReadError == 1) {
+            audio = document.getElementById("timedReadFail");
+            audio.play();
+        }
+
+        var worksheetCompleteAudioSource = $j('#worksheetCompleteAudioSource').val();
+        if (typeof worksheetCompleteAudioSource === 'string') {
+            audio = document.getElementById('worksheetCompleteAudio');
+            audio.play();
+        }
+
+        var vocabularyActivityCompleteAudioSource = $j('#vocabularyActivityCompleteAudioSource').val();
+        if (typeof vocabularyActivityCompleteAudioSource === 'string') {
+            audio = document.getElementById('vocabularyActivityCompleteAudio');
+            audio.play();
+        }
+
+        var enableFavoriteOption = $j('#enableFavoriteOption').val();
+        if (typeof enableFavoriteOption === 'string') {
+            var favorite = clg.razKids.FavoriteController($j);
+            $j('.favorite').click(function(){
+                favorite.toggleFavorite($j(this));
+            });
+        }
+    })
+</script>
+
+<input type="hidden" id="enableTimedReadError" name="enableTimedReadError" value="<?=$enableTimedReadError?>"/>
+
+<? if ($enableTimedReadError) { ?>
+    <audio id="timedReadFail">
+        <source src="/kaz_message_audio/TimedReading.mp3">
+    </audio>
+<? } ?>
+
+<? if ($_SESSION['studentInfo']['activityInfo']['activityType'] === ActivityTypeHelper::WORKSHEET_ACTIVITY_NAME) { ?>
+    <input type="hidden" id="worksheetCompleteAudioSource" name="worksheetCompleteAudioSource" value="<?=$worksheetCompleteAudioSource?>"/>
+
+    <audio id="worksheetCompleteAudio">
+        <source src="<?=$worksheetCompleteAudioSource?>">
+    </audio>
+<? } ?>
+
+<? if ($_SESSION['studentInfo']['activityInfo']['activityType'] === ActivityTypeHelper::VOCAB_GAME_PRACTICE_ACTIVITY_TYPE_NAME
+        || $_SESSION['studentInfo']['activityInfo']['activityType'] === ActivityTypeHelper::VOCAB_GAME_ASSESSMENT_ACTIVITY_TYPE_NAME) { ?>
+    <input type="hidden" id="vocabularyActivityCompleteAudioSource" name="vocabularyActivityCompleteAudioSource" value="<?=$vocabularyActivityCompleteAudioSource?>"/>
+    <audio id="vocabularyActivityCompleteAudio">
+        <source src="<?=$vocabularyActivityCompleteAudioSource?>">
+    </audio>
+<? } ?>
+
+<? if (isset($location)) { ?>
+    <div class="ebookHeader">
+        <div>
+            <a href="<?=$location?>" class="backBtn"><?=$linkText?></a>
+        </div>
+        <? if (!$_SESSION['score_earned']['assignment_complete']) { ?>
+            <h1 class="bookTitle"><?=$book['title'];?></h1>
+        <? } ?>
+        <div></div>
+    </div>
+<? } ?>
+
+<div class="rewardPage<? if (isset($book['delivery']['watch'])) { ?> rewardPage-watch<? } ?>" id="book-page">
+
+    <div class="rewardPage_results">
+        <? if ($_SESSION['score_earned']['question_count'] > 0) { ?>
+            <div id="resultsScore">
+                <h1>You have <span><?=$_SESSION['score_earned']['correct_answer_count']?> out of <?=$_SESSION['score_earned']['question_count']?> </span> correct.</h1>
+            </div>
+        <? } ?>
+        <? if ($enableTimedReadError) { ?>
+            <div class="rewardPage_message rewardPage_message-notQuiz">
+                You read this too quickly. Read it again.</br>
+                Make sure you read each word carefully.
+            </div>
+        <? } ?>
+
+        <input type="hidden" id="activityId" value="<?=$activityId?>"/>
+
+        <?	switch ($_SESSION['studentInfo']['activityInfo']['activityType']) {
+            case 'listen': ?>
+                <div class="rewardRobot" id="starsEarned">
+                    <span class="rewardPage_numStars"><?=$listenStarsEarned?></span>
+                    <img class="rewardPage_robotImage" src="<?=($_SESSION['score_earned']['listen'] && $_SESSION['score_earned']['assignment_complete']) ? '/images/robot-listen.png' : $book['listen_earned']['src']?>" />
+                </div>
+                <? if ($_SESSION['score_earned']['listen'] && $_SESSION['score_earned']['assignment_complete']) { ?>
+                    <h1 class="resultsHeading">Assignment Complete!</h1>
+                <? }
+                break;
+            case 'read': ?>
+                <div class="rewardRobot" id="starsEarned">
+                    <span class="rewardPage_numStars"><?=$readStarsEarned?></span>
+                    <img class="rewardPage_robotImage" src="<?=($_SESSION['score_earned']['read'] && $_SESSION['score_earned']['assignment_complete']) ? '/images/robot-read.png' : $book['read_earned']['src']?>" />
+                </div>
+                <? if ($recordingStarsEarned > 0) { ?>
+                    <div class="reward-bonus-banner">
+                        <span class="reward-bonus-banner-num"><?=$recordingStarsEarned?></span>
+                    </div>
+                <? } ?>
+                <? if ($_SESSION['score_earned']['read'] && $_SESSION['score_earned']['assignment_complete']) { ?>
+                    <h1 class="resultsHeading">Assignment Complete!</h1>
+                <? }
+                break;
+            case 'headsprout': ?>
+                <div class="rewardRobot" id="starsEarned">
+                    <span class="rewardPage_numStars"><?=$headsproutStarsEarned?></span>
+                    <img class="rewardPage_robotImage" src="/images/robot-passed.png" />
+                </div>
+                <h1 class="resultsHeading">Episode Complete!</h1>
+                <?
+                break;
+            case 'quiz': ?>
+                <div class="rewardRobot" id="starsEarned">
+                    <span class="rewardPage_numStars"><?=$quizStarsEarned?></span>
+                    <? if ($_SESSION['score_earned']['quiz_pass']) { ?>
+                        <img class="rewardPage_robotImage" src="/images/robot-passed.png" />
+                    <? } else if ($_SESSION['score_earned']['quiz_perfect']) { ?>
+                        <img class="rewardPage_robotImage" src="/images/robot-perfect.png" />
+                    <? } else { ?>
+                        <img class="rewardPage_robotImage" src="/images/robot-fail.png" />
+                    <? } ?>
+                </div>
+                <? if ($_SESSION['score_earned']['assignment_complete']) { ?>
+                    <h1 class="resultsHeading">Assignment Complete!</h1>
+                <? }
+                break;
+            case 'watch': ?>
+                <div class="rewardRobot" id="starsEarned">
+                    <span class="rewardPage_numStars"><?=$watchStarsEarned?></span>
+                    <img class="rewardPage_robotImage" src="<?=($_SESSION['score_earned']['watch'] && $_SESSION['score_earned']['assignment_complete']) ? '/images/robot-watch.png' : $book['watch_earned']['src']?>" />
+                </div>
+                <? if ($_SESSION['score_earned']['watch'] && $_SESSION['score_earned']['assignment_complete']) { ?>
+                    <h1 class="resultsHeading">Assignment Complete!</h1>
+                <? }
+                break;
+            case 'word_game': //TODO: Could support assignment in future. Might want to use reward-bonus-banner for bonus word stars, unless that's specific to recordings?>
+                <div class="rewardRobot" id="starsEarned">
+                    <span class="rewardPage_numStars"><?=$wordGameStarsEarned?></span>
+                    <image class="rewardPage_robotImage" src="<?=(isset($book['word_game_earned']['src'])) ? $book['word_game_earned']['src'] : '/images/robot-read.png'?>" />
+                </div>
+                <? break;
+            case ActivityTypeHelper::WORKSHEET_ACTIVITY_NAME: ?>
+                <div class="rewardRobot" id="starsEarned">
+                    <span class="rewardPage_numStars"><?=$worksheetStarsEarned?></span>
+                    <? if (is_numeric($_SESSION['score_earned']['worksheet_perfect'])) { ?>
+                        <img class="rewardPage_robotImage" src="/images/robot-perfect.png" />
+                    <? } else if (is_numeric($_SESSION['score_earned']['worksheet_pass'])) { ?>
+                        <img class="rewardPage_robotImage" src="/images/robot-passed.png" />
+                    <? } else { ?>
+                        <img class="rewardPage_robotImage" src="/images/robot-fail.png" />
+                    <? } ?>
+                </div>
+                <? if ($_SESSION['score_earned']['assignment_complete']) { ?>
+                    <h1 class="resultsHeading">Assignment Complete!</h1>
+                <? }
+                break;
+            case ActivityTypeHelper::VOCAB_GAME_PRACTICE_ACTIVITY_TYPE_NAME:
+                if ($isVocabGamesEnabled) {?>
+                    <div class="rewardRobot" id="starsEarned">
+                        <span class="rewardPage_numStars"><?=$vocabGameStarsEarned?></span>
+                        <img class="rewardPage_robotImage" src="/images/robot-perfect.png" />
+                    </div>
+                <?}
+                break;
+            case ActivityTypeHelper::VOCAB_GAME_ASSESSMENT_ACTIVITY_TYPE_NAME:
+                if ($isVocabGamesEnabled) {?>
+                    <div class="rewardRobot" id="starsEarned">
+                        <span class="rewardPage_numStars"><?=$vocabGameStarsEarned?></span>
+                        <? if (is_numeric($_SESSION['score_earned']['vsc_game_assessment_perfect'])) { ?>
+                            <img class="rewardPage_robotImage" src="/images/robot-perfect.png" />
+                        <? } else if (is_numeric($_SESSION['score_earned']['vsc_game_assessment_pass'])) { ?>
+                            <img class="rewardPage_robotImage" src="/images/robot-passed.png" />
+                        <? } else { ?>
+                            <img class="rewardPage_robotImage" src="/images/robot-fail.png" />
+                        <? } ?>
+                    </div>
+                    <? if ($_SESSION['score_earned']['assignment_complete']) { ?>
+                        <h1 class="resultsHeading">Assignment Complete!</h1>
+                    <? }
+                }
+                break;
+            default:
+                break;
+        }
+
+        if ($_SESSION['score_earned']['runningRecord'] || isset($_SESSION['score_earned']['assessment'])) { ?>
+            <div class="rewardRobot" id="starsEarned">
+                <span class="rewardPage_numStars"><?=(is_numeric($_SESSION['score_earned']['runningRecord']) ? $_SESSION['score_earned']['runningRecord'] : $_SESSION['score_earned']['assessment'])?></span>
+                <img class="rewardPage_robotImage" src="/images/robot-listen.png" />
+            </div>
+            <h1 class="resultsHeading">Assessment Complete!</h1> <?
+        }
+        if($additionalStarsEarned > 0 && !$enableTimedReadError){
+            ?>
+            <feature-check code="DOUBLE_STAR_BOOKS">
+                <enabled>
+                    <div class="rewards_doubleStar" id="additionalStars">
+                        <div class="presentationOnly">
+                            <span>
+                                <span class="rewards_doubleStarBonus">+<?=$additionalStarsEarned?></span> for Double-Star Book!
+                            </span>
+                        </div>
+                    </div>
+                </enabled>
+            </feature-check>
+            <?
+        } else {
+            ?>
+            <style>
+                .doubleStar {
+                    display: none;
+                }
+            </style>
+        <? } ?>
+
+    <? if ($canFavoriteResource) { ?>
+        <script type="text/javascript" src="/js/favorite/favorite<?=$_ENV['BUILDTAG']?>.js" nonce="<?=$_ENV['RANDOM_NONCE']?>"></script>
+        <input type="hidden" id="enableFavoriteOption" name="enableFavoriteOption" value="<?=$canFavoriteResource?>"/>
+        <div class="favorite-button">
+            <!-- TODO: fix for accessibility -->
+            <button id="favorite_<?=$book['kids_book_id']?>" class="favorite <?= $isFavorite ? 'is-active' : '' ?>" title="Add to Favorites!">
+                <span class="favoriteBtn"></span>
+            </button>
+            <span id="favoriteDisabled" style="display:none">Could not favorite this item. Try again later.</span>
+        </div>
+    <? } ?>
+    <div id="activityStatus" class="rewardPage_activities">
+        <? if (!$_SESSION['score_earned']['assignment_complete']) { ?>
+            <? $assignmentParam = $book['assignment_type_category'] != 'headsprout' && isset($book['student_assignment_id']) && !empty($book['student_assignment_id']) && is_numeric($book['student_assignment_id']) ? "/student-assignment-id/" . $book['student_assignment_id'] : '' ?>
+            <? if (isset($book['delivery']['listen'])) { ?>
+                <a class="activity_link <?=$book['listen']['class-status']?> <?=$book['listen']['class-bookmark']?>" href="<?=$book['listen']['href'] . $assignmentParam?>" title="<?=$book['listen']['title']?>">
+                    <span class="icon activity_icon activity_icon-lg icon-listenC"></span>
+                </a>
+        <? } ?>
+        <? if (isset($book['delivery']['read']) && !is_numeric($_SESSION['score_earned']['assessment'])) { ?>
+                <a class="activity_link <?=$book['read']['class-status']?> <?=$book['read']['class-bookmark']?>" href="<?=$book['read']['href'] . $assignmentParam?>" title="<?=$book['read']['title']?>">
+                    <span class="icon activity_icon activity_icon-lg icon-readC"></span>
+                </a>
+        <? } ?>
+        <? if (isset($book['delivery']['quiz']) && !$isRecordingOnlyOrMatchingAssessment) {
+            $unlockActivityUrl = !empty($book['read']['href']) ? $book['read']['href'] : (!empty($book['listen']['href']) ? $book['listen']['href'] : "");
+            $unlockActivityAction = !empty($book['read']['href']) ? 'read' : (!empty($book['listen']['href']) ? 'listen to' : " ")?>
+
+            <student-resource-delivery-quiz
+                    status="{isLocked:          <?=$book['delivery']['quiz']['is_locked']?'true':'false'?>,
+                             isDisabled:        <?=$book['delivery']['quiz']['active']=='true'?'false':'true'?>,
+                             isPassedPerfect:   <?=$book['delivery']['quiz']['completion_status']['perfect']?'true':'false'?>,
+                             isPerfect:         <?=$book['delivery']['quiz']['completion_status']['passed']?'true':'false'?>}"
+                    resource-title="'<?=addslashes($book['title'])?>'"
+                    quiz-activity-url="'<?=$book['quiz']['href'] . $assignmentParam?>'"
+                    unlock-activity-url="'<?=$unlockActivityUrl . $assignmentParam?>'"
+                    unlock-activity-action="'<?=$unlockActivityAction?>'"
+                    is-large-icon="true"></student-resource-delivery-quiz>
+        <? } ?>
+        <? if (isset($book['delivery']['watch'])) { ?>
+                <a class="activity_link <?=$book['watch']['class-status']?> " href="<?=$book['watch']['href']?>" title="<?=$book['watch']['title']?>">
+                    <span class="icon activity_icon activity_icon-lg icon-watchC"></span>
+                </a>
+        <? } ?>
+        <? if (isset($book['delivery']['worksheet'])) { ?>
+                <a class="activity_link <?=$book['worksheet']['class-status']?> <?=$book['worksheet']['class-bookmark']?>" href="<?=$book['worksheet']['href'] . $assignmentParam?>" title="<?=$book['worksheet']['title']?>">
+                    <span class="icon activity_icon activity_icon-lg icon-interactivityC"></span>
+                </a>
+        <? } ?>
+        <? if ($isWordGameEnabled && isset($book['delivery']['word_game'])) { ?>
+            <script type="text/javascript" src="/js/favorite/favorite<?=$_ENV['BUILDTAG']?>.js" nonce="<?=$_ENV['RANDOM_NONCE']?>"></script>
+            <div class="activityIcons_icon activityIconContainer activityIconContainer-lg <?=$book['word_game']['class-status']?> <?=$book['word_game']['class-bookmark']?> <?=$book['word_game']['class-disabled']?>">
+                <a href="<?=$book['word_game']['href']?>" title="<?=$book['word_game']['title']?>" <?=($book['delivery']['word_game']['active'] == 'false') ? 'return false;' : '' ?>>
+                    <span class="icon  icon-word_gameC"></span>
+                </a>
+            </div>
+        <? } ?>
+        <? if ($isVocabGamesEnabled && isset($book['delivery']['vsc_game_practice'])) { ?>
+            <a class=" activity_link <?=$book['vsc_game_practice']['class-status']?> <?=$book['vsc_game_practice']['class-disabled']?>" href="<?=$book['vsc_game_practice']['href'] .  $assignmentParam?>" title="<?=$book['vsc_game_practice']['title']?>" <?=($book['delivery']['vsc_game_practice']['active'] == 'false') ? 'return false;' : '' ?>>
+                <span class="icon activity_icon activity_icon-lg icon-interactivityC"></span>
+            </a>
+        <? } ?>
+        <? if ($isVocabGamesEnabled && isset($book['delivery']['vsc_game_assessment'])) {?>
+            <student-resource-delivery-vocab-game-assessment
+                    status="{isLocked:          <?=$book['delivery']['vsc_game_assessment']['is_locked']?'true':'false'?>,
+                             isDisabled:        <?=$book['delivery']['vsc_game_assessment']['active']=='true'?'false':'true'?>,
+                             isPassedPerfect:   <?=$book['delivery']['vsc_game_assessment']['completion_status']['perfect']?'true':'false'?>,
+                             isPerfect:         <?=$book['delivery']['vsc_game_assessment']['completion_status']['passed']?'true':'false'?>}"
+                    resource-title="'<?=addslashes($book['title'])?>'"
+                    vsc-game-activity-url="'<?=$book['vsc_game_assessment']['href'] . $assignmentParam?>'"
+                    is-large-icon="true"
+                    show-as-overlay="true"
+                    is-card-context="false"
+            ></student-resource-delivery-vocab-game-assessment>
+        <? } ?>
+        <? } ?>
+    </div><!-- /l-flex -->
+    </div><!-- /.results -->
+    <? if( $allowReturnHome ) { ?>
+        <a href="<?=$location?>" class="pageArrowForward-home icon-homeC" id="forward-page">
+            <span>Home</span>
+        </a>
+    <? } ?>
+
+</div><!-- /.rewardPage -->

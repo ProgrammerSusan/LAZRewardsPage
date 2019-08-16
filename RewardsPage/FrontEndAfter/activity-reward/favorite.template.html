@@ -1,0 +1,11 @@
+<input type="hidden" id="enableFavoriteOption" name="enableFavoriteOption"
+        value="{{$ctrl.canFavoriteResource}}"/>
+<div class="favorite-button">
+    <!-- TODO: fix for accessibility -->
+    <button id="favorite_{{$ctrl.bookId}}" class="favorite " ng-class="{'is-active' : $ctrl.isFavorite,
+                                                                        'disabled' : $ctrl.isDisabled}"
+            title="Add to Favorites!" ng-click="$ctrl.saveFavoriteState($ctrl.bookId)">
+        <span class="favoriteBtn"></span>
+    </button>
+    <span id="favoriteDisabled" style="display:none" ng-if="$ctrl.isDisabled">Could not favorite this item. Try again later.</span>
+</div>
