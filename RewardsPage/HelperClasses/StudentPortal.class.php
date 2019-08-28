@@ -30,7 +30,15 @@ class StudentPortal extends Controller
     }
 
     public function setStudentAssignmentsContext() {
-/* ------------------------------------------------------------------------------ FEATURE CODE ----------------------------------------------------------------------------- */		
+/* ------------------------------------------------------------------------------ FEATURE CODE ----------------------------------------------------------------------------- */	
+/* 
+*
+*
+The following code was not written by myself, instead this is existing code I extracted that caches student data, something that existed in 
+a different area, and applied it to all areas in order for student data to be displayed on the rewards page
+*
+*
+*/		
         //If feature deployed remove if block, otherwise move code within block back to (if isIntermediateInterfaceEnabled())
         $featureCheck = new FeatureCheck();
         if (FeatureCheck::hasFeatureEnabled("REWARDS_PAGE_INTERN_PROJECT") || StudentInfoCache::isIntermediateInterfaceEnabled()){
